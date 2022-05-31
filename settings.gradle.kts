@@ -1,6 +1,5 @@
-rootProject.name = "gradle-kotlin-dsl-template"
+rootProject.name = "initializr"
 
-include(":app")
 include(":compiler")
-include(":framework")
-include(":plugin")
+include(":core")
+include(":runtime")
