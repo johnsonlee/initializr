@@ -1,12 +1,20 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        google()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath("io.johnsonlee.initializr:compiler:1.0.0")
+    }
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("io.johnsonlee.template-gradle-plugin")
-}
-
-repositories {
-    mavenCentral()
-    google()
+    id("kotlin-kapt")
+    id("com.didiglobal.booster")
 }
 
 android {
@@ -49,8 +57,12 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.3.6")
     implementation("androidx.lifecycle:lifecycle-common:2.3.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.1")
-    implementation(project(":framework"))
-    testImplementation("junit:junit:4.+")
+    implementation(project(":core"))
+    implementation(project(":runtime"))
+
+    kapt(project(":compiler"))
+
+    testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
     androidTestImplementation("androidx.test:runner:1.4.0")
     androidTestImplementation("androidx.test:rules:1.4.0")
