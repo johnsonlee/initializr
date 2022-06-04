@@ -1,40 +1,20 @@
-import org.gradle.api.Project.DEFAULT_VERSION
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
-buildscript {
-    repositories {
-        mavenCentral()
-        google()
-        gradlePluginPortal()
-    }
-
-    val agpVersion: String by extra
-    val boosterVersion: String by extra
-
-    dependencies {
-        classpath("com.android.tools.build:gradle:${agpVersion}")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${embeddedKotlinVersion}")
-        classpath("com.didiglobal.booster:booster-gradle-plugin:${boosterVersion}")
-        classpath("io.johnsonlee:sonatype-publish-plugin:1.6.2")
-    }
+tasks.register("cleanAll") {
+    dependsOn(gradle.includedBuild("buildscripts").task(":cleanAll"))
+    dependsOn(gradle.includedBuild("core").task(":clean"))
+    dependsOn(gradle.includedBuild("runtime").task(":clean"))
+    dependsOn(gradle.includedBuild("compiler").task(":clean"))
+    dependsOn(gradle.includedBuild("plugin").task(":clean"))
+    dependsOn(":app:clean")
 }
 
-group = "io.johnsonlee.initializr"
-version = findProperty("version")?.takeIf { it != DEFAULT_VERSION } ?: "1.0.0-SNAPSHOT"
+tasks.register("publishToMavenLocal") {
+    dependsOn(gradle.includedBuild("core").task(":publishToMavenLocal"))
+    dependsOn(gradle.includedBuild("runtime").task(":publishToMavenLocal"))
+    dependsOn(gradle.includedBuild("compiler").task(":publishToMavenLocal"))
+}
 
-allprojects {
-    group = rootProject.group
-    version = rootProject.version
-
-    repositories {
-        mavenCentral()
-        google()
-    }
-
-    tasks.withType<KotlinCompile> {
-        kotlinOptions {
-            freeCompilerArgs = listOf("-Xjsr305=strict", "-Xskip-metadata-version-check")
-            jvmTarget = "1.8"
-        }
-    }
+tasks.register("publishToSonatype") {
+    dependsOn(gradle.includedBuild("core").task(":publishToSonatype"))
+    dependsOn(gradle.includedBuild("runtime").task(":publishReleasePublicationToSonatypeRepository"))
+    dependsOn(gradle.includedBuild("compiler").task(":publishToSonatype"))
 }
