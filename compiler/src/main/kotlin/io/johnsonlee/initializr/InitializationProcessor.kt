@@ -1,7 +1,5 @@
 package io.johnsonlee.initializr
 
-import androidx.annotation.AnyThread
-import androidx.annotation.WorkerThread
 import com.github.mustachejava.util.DecoratedCollection
 import com.google.auto.common.AnnotationMirrors
 import com.google.auto.service.AutoService
@@ -10,7 +8,6 @@ import io.johnsonlee.codegen.model.Model
 import io.johnsonlee.codegen.template.TemplateEngine
 import io.johnsonlee.codegen.template.mustache.MustacheEngine
 import io.johnsonlee.initializr.annotation.Initialization
-import io.johnsonlee.initializr.annotation.ThreadType
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
@@ -18,11 +15,8 @@ import javax.annotation.processing.SupportedSourceVersion
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.AnnotationMirror
 import javax.lang.model.element.AnnotationValue
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.TypeKind
 import javax.lang.model.util.SimpleAnnotationValueVisitor8
-import javax.lang.model.util.SimpleElementVisitor8
 
 @AutoService(Processor::class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -36,10 +30,9 @@ class InitializationProcessor : CodegenProcessor<Initialization>() {
             val mirror = element.getAnnotationMirror<Initialization>() ?: return@onEachAnnotatedElement
             val name = mirror.name
             val dependencies = DecoratedCollection(mirror.dependencies)
-            val thread = element.accept(ThreadTypeVisitor, null) ?: ThreadType.MAIN
 
             if (checkImplementation(implementation, processingEnv.elementUtils.getTypeElement(Initializer::class.java.name))) {
-                val model = InitModel(implementation.qualifiedName.toString(), name, dependencies, thread)
+                val model = InitModel(implementation.qualifiedName.toString(), name, dependencies)
                 generate("${TEMPLATE_PREFIX}/${IDENTIFIER}", model, InitializrResource)
             } else {
                 processingEnv.error("${implementation.qualifiedName} does not implement ${Initializer::class.java}", element, mirror)
@@ -65,8 +58,7 @@ object InitializrResource : Resource {
 data class InitModel(
     override val qualifiedName: String,
     val name: String,
-    val dependencies: DecoratedCollection<String>,
-    val thread: ThreadType
+    val dependencies: DecoratedCollection<String>
 ) : Model {
     override val references: Set<String> = emptySet()
     override val packageName: String = qualifiedName.substringBeforeLast('/')
@@ -87,15 +79,3 @@ private val AnnotationMirror.dependencies: Set<String>
             }.flatten().toSet()
         }
     }, null)
-
-private object ThreadTypeVisitor : SimpleElementVisitor8<ThreadType?, Void>() {
-    override fun visitExecutable(executable: ExecutableElement, p: Void?): ThreadType? {
-        return if (executable.simpleName.contentEquals(Initializer::initialize.name) && executable.returnType.kind == TypeKind.BOOLEAN) {
-            if (executable.getAnnotationMirror<WorkerThread>() != null || executable.getAnnotationMirror<AnyThread>() != null) {
-                ThreadType.WORKER
-            } else {
-                ThreadType.MAIN
-            }
-        } else null
-    }
-}

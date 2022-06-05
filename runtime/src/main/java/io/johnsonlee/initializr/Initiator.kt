@@ -6,16 +6,15 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.tracing.trace
-import io.johnsonlee.initializr.InitResolver.resolveBuildFlavor
-import io.johnsonlee.initializr.InitResolver.resolveBuildType
 import io.johnsonlee.initializr.annotation.Initialization
-import io.johnsonlee.initializr.annotation.ThreadType
 import io.johnsonlee.initializr.internal.ContextImpl
 import io.johnsonlee.initializr.internal.InitGraph
-import io.johnsonlee.initializr.internal.InitGraph.Companion.SENTINEL
+import io.johnsonlee.initializr.internal.InitResolver
 import io.johnsonlee.initializr.internal.InitTask
 import io.johnsonlee.initializr.internal.InitializerWrapper
 import io.johnsonlee.initializr.internal.MainLooper
+import io.johnsonlee.initializr.internal.resolveBuildFlavor
+import io.johnsonlee.initializr.internal.resolveBuildType
 import io.johnsonlee.once.Once
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.ForkJoinTask
@@ -67,7 +66,7 @@ class Initiator {
                         } else {
                             ThreadType.MAIN
                         }
-                        InitGraph.Vertex(init.name, InitializerWrapper(init.name, thread, it), init.dependencies.toSet(), thread)
+                        InitGraph.Vertex(init.name, InitializerWrapper(init.name, it), init.dependencies.toSet())
                     }
                 }.toSet()
                 doInit(app, resolveBuildType(app), resolveBuildFlavor(app), buildInitGraph(specs))
@@ -134,8 +133,13 @@ class Initiator {
         private fun buildInitGraph(vertexes: Set<InitGraph.Vertex>): InitGraph = trace("Initiator#buildInitGraph") {
             val n2v = vertexes.associateBy(InitGraph.Vertex::name)
 
+            val sentinel = InitGraph.Vertex("\$\$sentinel\$\$", InitializerWrapper("\$\$sentinel\$\$", object : Initializer {
+                override fun initialize(context: Context) = Unit
+                override val runningThreadType: ThreadType = ThreadType.WORKER
+            }), emptySet())
+
             vertexes.fold(InitGraph.Builder()) { builder, u ->
-                val vv = u.dependencies.mapNotNull(n2v::get).takeIf(List<InitGraph.Vertex>::isNotEmpty) ?: listOf(SENTINEL)
+                val vv = u.dependencies.mapNotNull(n2v::get).takeIf(List<InitGraph.Vertex>::isNotEmpty) ?: listOf(sentinel)
                 vv.forEach { v ->
                     builder.addEdge(u, v)
                 }

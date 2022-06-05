@@ -126,17 +126,15 @@ class InitResolverTransformer : ClassTransformer {
                 visitInsn(Opcodes.DUP)
                 // ..., wrapper, wrapper, name
                 visitLdcInsn(config.name)
-                // ..., wrapper, wrapper, name, thread
-                visitFieldInsn(Opcodes.GETSTATIC, FQ_THREAD_TYPE, config.thread.name, "L${FQ_THREAD_TYPE};")
+                // ..., wrapper, wrapper, name, initializer
                 val desc = initializer.replace('.', '/')
-                // ..., wrapper, wrapper, name, thread, initializer
                 visitTypeInsn(Opcodes.NEW, desc)
-                // ..., wrapper, wrapper, name, thread, initializer, initializer
+                // ..., wrapper, wrapper, name, initializer, initializer
                 visitInsn(Opcodes.DUP)
-                // ..., wrapper, wrapper, name, thread, initializer
+                // ..., wrapper, wrapper, name, initializer
                 visitMethodInsn(Opcodes.INVOKESPECIAL, desc, "<init>", "()V", false)
                 // ..., wrapper
-                visitMethodInsn(Opcodes.INVOKESPECIAL, FQ_INITIALIZER_WRAPPER, "<init>", "(L${FQ_JAVA_LANG_STRING};L${FQ_THREAD_TYPE};L${FQ_INITIALIZER};)V", false)
+                visitMethodInsn(Opcodes.INVOKESPECIAL, FQ_INITIALIZER_WRAPPER, "<init>", "(L${FQ_JAVA_LANG_STRING};L${FQ_INITIALIZER};)V", false)
 
                 visitVarInsn(Opcodes.ASTORE, slot)
                 Triple(initializer, slot, Label().apply(this::visitLabel))
@@ -174,7 +172,7 @@ class InitResolverTransformer : ClassTransformer {
             visitLocalVariable("var0", "L${FQ_ANDROID_APP_APPLICATION};", null, start, end, 0)
             initializers.withIndex().forEach { (i, v) ->
                 val slot = i + lvtOffset
-                visitLocalVariable("var${slot}", "L${FQ_INITIALIZER};", null, variables[v]!!.third, end, slot)
+                visitLocalVariable("var${slot}", "L${FQ_INITIALIZER_WRAPPER};", null, variables[v]!!.third, end, slot)
             }
         }
     }
@@ -207,12 +205,8 @@ class InitResolverTransformer : ClassTransformer {
             else -> buildDependencies(cfg)
         }
 
-        // arg3: thread
-        // ..., vertex, vertex, name, wrapper, dependencies thread
-        visitFieldInsn(Opcodes.GETSTATIC, FQ_THREAD_TYPE, cfg.thread.name, "L${FQ_THREAD_TYPE};")
-
         // ..., vertex
-        visitMethodInsn(Opcodes.INVOKESPECIAL, FQ_INIT_GRAPH_VERTEX, "<init>", "(L${FQ_JAVA_LANG_STRING};L${FQ_INITIALIZER_WRAPPER};L${FQ_JAVA_UTIL_SET};L${FQ_THREAD_TYPE};)V", false)
+        visitMethodInsn(Opcodes.INVOKESPECIAL, FQ_INIT_GRAPH_VERTEX, "<init>", "(L${FQ_JAVA_LANG_STRING};L${FQ_INITIALIZER_WRAPPER};L${FQ_JAVA_UTIL_SET};)V", false)
     }
 
     private fun MethodVisitor.buildDependencies(cfg: InitConfig) {
@@ -283,14 +277,13 @@ private const val FQ_JAVA_UTIL_LIST = "java/util/List"
 
 private const val FQ_ANDROID_APP_APPLICATION = "android/app/Application"
 
-private const val FQ_INIT_RESOLVER = "${PREFIX}/InitResolver"
+private const val FQ_INIT_RESOLVER = "${INTERNAL}/InitResolverKt"
 private const val FQ_INIT_GRAPH = "${INTERNAL}/InitGraph"
 private const val FQ_INIT_GRAPH_BUILDER = "${FQ_INIT_GRAPH}\$Builder"
 private const val FQ_INIT_GRAPH_VERTEX = "${FQ_INIT_GRAPH}\$Vertex"
 private const val FQ_INITIALIZER_WRAPPER = "${INTERNAL}/InitializerWrapper"
 
 private const val FQ_INITIALIZER = "${PREFIX}/Initializer"
-private const val FQ_THREAD_TYPE = "${PREFIX}/annotation/ThreadType"
 
 internal const val RESOLVE_BUILD_TYPE_NAME = "resolveBuildType"
 internal const val RESOLVE_BUILD_TYPE_DESC = "(Landroid/app/Application;)Ljava/lang/String;"

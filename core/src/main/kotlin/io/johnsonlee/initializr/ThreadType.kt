@@ -1,4 +1,4 @@
-package io.johnsonlee.initializr.annotation
+package io.johnsonlee.initializr
 
 /**
  * The running thread of initializer
