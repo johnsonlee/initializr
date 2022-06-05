@@ -1,8 +1,5 @@
 package io.johnsonlee.initializr.internal
 
-import io.johnsonlee.initializr.Context
-import io.johnsonlee.initializr.Initializer
-import io.johnsonlee.initializr.annotation.ThreadType
 import java.util.Collections
 
 internal class InitGraph private constructor(
@@ -67,8 +64,7 @@ internal class InitGraph private constructor(
     data class Vertex(
             val name: String,
             val initializer: InitializerWrapper,
-            val dependencies: Set<String>,
-            val thread: ThreadType
+            val dependencies: Set<String>
     ) {
         override fun equals(other: Any?): Boolean {
             if (other === this) return true
@@ -81,15 +77,6 @@ internal class InitGraph private constructor(
         override fun hashCode(): Int {
             return arrayOf(name, initializer.javaClass, dependencies).contentHashCode()
         }
-    }
-
-    companion object {
-
-        private const val SENTINEL_NAME = "\$\$sentinel\$\$"
-
-        val SENTINEL = Vertex(SENTINEL_NAME, InitializerWrapper(SENTINEL_NAME, ThreadType.WORKER, object : Initializer {
-            override fun initialize(context: Context) = Unit
-        }), emptySet(), ThreadType.WORKER)
     }
 
 }

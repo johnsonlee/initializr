@@ -29,5 +29,7 @@ interface Initializer {
      */
     fun initialize(context: Context)
 
+    val runningThreadType: ThreadType
+
 }
 

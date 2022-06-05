@@ -1,13 +1,11 @@
 package io.johnsonlee.initializr
 
 import com.didiglobal.booster.graph.Node
-import io.johnsonlee.initializr.annotation.ThreadType
 
 data class InitConfig(
         val name: String,
         val initializer: String,
-        val dependencies: List<String>,
-        val thread: ThreadType
+        val dependencies: List<String>
 ) : Node {
     override fun hashCode(): Int {
         return initializer.hashCode()
