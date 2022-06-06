@@ -27,7 +27,7 @@ jobs:
         echo "Release version ${GITHUB_REF/refs\/tags\/v/} ..."
         echo "Create GPG private key"
         echo $GPG_KEY_ARMOR | base64 --decode > ${GITHUB_WORKSPACE}/secring.gpg
-        ./gradlew clean initializeSonatypeStagingRepository publishToSonatype closeAndReleaseRepository -S --no-daemon \
+        ./gradlew clean initializeSonatypeStagingRepository publishToSonatype closeAndReleaseRepository -x publishDebugPublicationToSonatypeRepository -S --no-daemon \
             -Pversion=${GITHUB_REF/refs\/tags\/v/} \
             -POSSRH_USERNAME=${OSSRH_USERNAME} \
             -POSSRH_PASSWORD=${OSSRH_PASSWORD} \
