@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion(deps.android.compileSdkVersion)
+    compileSdkVersion(config.compileSdkVersion)
 
     defaultConfig {
-        minSdkVersion(deps.android.minSdkVersion)
-        targetSdkVersion(deps.android.targetSdkVersion)
+        minSdkVersion(config.minSdkVersion)
+        targetSdkVersion(config.targetSdkVersion)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -43,8 +43,8 @@ dependencies {
     implementation(kotlin("bom"))
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation(deps.jetpack.annotation())
+    implementation(jetpack.annotation())
 
     testImplementation(kotlin("test"))
-    testImplementation(deps.junit())
+    testImplementation(junit())
 }

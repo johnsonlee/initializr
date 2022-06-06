@@ -8,7 +8,6 @@ import io.johnsonlee.initializr.ThreadType
 import io.johnsonlee.once.Once
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.system.measureTimeMillis
 
 internal class InitializerWrapper(
     private val name: String,

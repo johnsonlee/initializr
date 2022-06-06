@@ -1,3 +1,4 @@
+import org.gradle.api.JavaVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -13,14 +14,19 @@ dependencies {
     implementation(kotlin("bom"))
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation(deps.booster("booster-api"))
-    implementation(deps.booster("booster-cha"))
-    implementation(deps.booster("booster-graph"))
-    implementation(deps.booster("booster-transform-asm"))
+    implementation(booster("booster-api"))
+    implementation(booster("booster-cha"))
+    implementation(booster("booster-graph"))
+    implementation(booster("booster-transform-asm"))
     implementation("com.google.auto.service:auto-service:1.0")
 
     testImplementation(kotlin("test"))
-    testImplementation(deps.junit())
+    testImplementation(junit())
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.withType<KotlinCompile> {

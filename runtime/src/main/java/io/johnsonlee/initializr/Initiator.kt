@@ -54,18 +54,9 @@ class Initiator {
 
         private fun doInit(app: Application, initializers: Set<Initializer>) {
             trace("Initiator#doInitWithInitializers") {
-                val initialize = Initializer::class.java.methods.first {
-                    it.parameterTypes.size == 1 && arrayOf(Context::class.java).contentEquals(it.parameterTypes)
-                }
                 val specs = initializers.mapNotNull {
                     val clazz = it.javaClass
                     clazz.getAnnotation(Initialization::class.java)?.let { init ->
-                        val m = clazz.declaredMethods.first { m -> m == initialize }
-                        val thread = if (m.isAnnotationPresent(WorkerThread::class.java)) {
-                            ThreadType.WORKER
-                        } else {
-                            ThreadType.MAIN
-                        }
                         InitGraph.Vertex(init.name, InitializerWrapper(init.name, it), init.dependencies.toSet())
                     }
                 }.toSet()
@@ -151,7 +142,7 @@ class Initiator {
         internal fun log(msg: String, e: Throwable? = null) {
             if (debuggable.value != true) return
             val logger: (String, String, Throwable?) -> Int = if (e == null) Log::i else Log::e
-            logger("initializr", msg, e)
+            logger(IDENTIFIER, msg, e)
         }
 
     }
