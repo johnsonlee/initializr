@@ -1,5 +1,5 @@
 plugins {
-    id("android-library-plugin")
+    id("android-library-convention")
 }
 
 repositories {
@@ -10,5 +10,5 @@ repositories {
 dependencies {
     api("${group}:core")
     implementation("io.johnsonlee:once:1.1.0")
-    implementation(deps.jetpack.tracing())
+    implementation(jetpack.tracing())
 }

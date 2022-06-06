@@ -1,5 +1,5 @@
 plugins {
-    id("kotlin-library-plugin")
+    id("booster-kotlin-library-convention")
 }
 
 repositories {
@@ -8,5 +8,5 @@ repositories {
 }
 
 dependencies {
-    compileOnly(deps.booster("booster-android-api"))
+    compileOnly(booster("booster-android-api"))
 }

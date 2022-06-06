@@ -12,7 +12,12 @@ dependencies {
     implementation(kotlin("reflect"))
 
     testImplementation(kotlin("test"))
-    testImplementation(deps.junit())
+    testImplementation(junit())
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 tasks.withType<KotlinCompile> {
