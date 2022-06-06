@@ -27,17 +27,26 @@ jobs:
         echo "Release version ${GITHUB_REF/refs\/tags\/v/} ..."
         echo "Create GPG private key"
         echo $GPG_KEY_ARMOR | base64 --decode > ${GITHUB_WORKSPACE}/secring.gpg
-        ./gradlew clean initializeSonatypeStagingRepository publishToSonatype closeAndReleaseRepository -S --no-daemon \
+        ./gradlew initializeSonatypeStagingRepository -S --no-daemon -Pversion=${GITHUB_REF/refs\/tags\/v/}
+        ./gradlew -p core publishToSonatype -S --no-daemon \
             -Pversion=${GITHUB_REF/refs\/tags\/v/} \
-            -POSSRH_USERNAME=${OSSRH_USERNAME} \
-            -POSSRH_PASSWORD=${OSSRH_PASSWORD} \
-            -POSSRH_PACKAGE_GROUP=${OSSRH_PACKAGE_GROUP} \
             -Psigning.keyId=${GPG_KEY_ID} \
             -Psigning.password=${GPG_PASSPHRASE} \
             -Psigning.secretKeyRingFile=${GITHUB_WORKSPACE}/secring.gpg
+        ./gradlew -p compiler publishToSonatype -S --no-daemon \
+            -Pversion=${GITHUB_REF/refs\/tags\/v/} \
+            -Psigning.keyId=${GPG_KEY_ID} \
+            -Psigning.password=${GPG_PASSPHRASE} \
+            -Psigning.secretKeyRingFile=${GITHUB_WORKSPACE}/secring.gpg
+        ./gradlew -p runtime publishReleasePublicationToSonatypeRepository -S --no-daemon \
+            -Pversion=${GITHUB_REF/refs\/tags\/v/} \
+            -Psigning.keyId=${GPG_KEY_ID} \
+            -Psigning.password=${GPG_PASSPHRASE} \
+            -Psigning.secretKeyRingFile=${GITHUB_WORKSPACE}/secring.gpg
+        ./gradlew closeAndReleaseRepository -S --no-daemon -Pversion=${GITHUB_REF/refs\/tags\/v/}
       env:
-        JAVA_OPTS: -Xmx8g -XX:MaxPermSize=1g -XX:MetaspaceSize=1g -Dfile.encoding=UTF-8
-        JVM_OPTS:  -Xmx8g -XX:MaxPermSize=1g -XX:MetaspaceSize=1g -Dfile.encoding=UTF-8
+        JAVA_OPTS: -Xmx8g -XX:MetaspaceSize=1g -Dfile.encoding=UTF-8
+        JVM_OPTS:  -Xmx8g -XX:MetaspaceSize=1g -Dfile.encoding=UTF-8
         GPG_KEY_ARMOR: ${{ secrets.GPG_KEY_ARMOR }}
         GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
