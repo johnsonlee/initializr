@@ -49,9 +49,8 @@ dependencies {
     name = "PrimaryInitializer",
     dependencies = []
 )
-class PrimaryInitializer : Initializer {
+class PrimaryInitializer : AbstractInitializer {
 
-    @WorkerThread
     override fun initialize(context: Context) {
     }
 
@@ -65,9 +64,8 @@ class PrimaryInitializer : Initializer {
     name = "SecondaryInitializer",
     dependencies = ["PrimaryInitializer"]
 )
-class SecondaryInitializer : Initializer {
+class SecondaryInitializer : AbstractInitializer {
 
-    @WorkerThread
     override fun initialize(context: Context) {
     }
 
